@@ -1,0 +1,28 @@
+- name: Install packages on ubuntu systems
+  hosts: ubuntu
+  become: yes
+  
+  tasks:
+    - name: Update apt cache (Debian/Ubuntu)
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+    
+    - name: Install packages on Debian/Ubuntu
+      apt:
+        name: ['apache']
+        state: present
+      when: ansible_os_family == "Debian"
+    
+    - name: Install packages on RedHat/CentOS
+      yum:
+        name: ['apache']
+        state: present
+      when: ansible_os_family == "RedHat"
+    
+    - name: Verify installation
+      command: which apache
+      register: install_check
+      changed_when: false
+      failed_when: install_check.rc != 0
