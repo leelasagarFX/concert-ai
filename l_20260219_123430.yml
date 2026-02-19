@@ -1,0 +1,32 @@
+---
+- name: Remove packages from systems
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Remove packages on Debian/Ubuntu
+      apt:
+        name: ['python']
+        state: absent
+        purge: yes
+        autoremove: yes
+      when: ansible_os_family == "Debian"
+    
+    - name: Remove packages on RedHat/CentOS/RHEL
+      yum:
+        name: ['python']
+        state: absent
+        autoremove: yes
+      when: ansible_os_family == "RedHat"
+    
+    - name: Verify removal
+      command: which python
+      register: removal_check
+      changed_when: false
+      failed_when: removal_check.rc == 0
+      ignore_errors: yes
+    
+    - name: Display removal status
+      debug:
+        msg: "Package python has been successfully removed"
+      when: removal_check.rc != 0
