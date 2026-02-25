@@ -1,0 +1,49 @@
+---
+- name: Setup Python Flask app with Gunicorn on RHEL
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Install EPEL repository
+      yum:
+        name: epel-release
+        state: present
+      when: ansible_os_family == "RedHat"
+    
+    - name: Install Python3 and pip
+      yum:
+        name:
+          - python3
+          - python3-pip
+        state: present
+      when: ansible_os_family == "RedHat"
+    
+    - name: Install Flask using pip3
+      pip:
+        name: flask
+        executable: pip3
+      when: ansible_os_family == "RedHat"
+    
+    - name: Install Gunicorn using pip3
+      pip:
+        name: gunicorn
+        executable: pip3
+      when: ansible_os_family == "RedHat"
+    
+    - name: Verify Flask installation
+      command: python3 -c "import flask; print(flask.__version__)"
+      register: flask_check
+      changed_when: false
+    
+    - name: Verify Gunicorn installation
+      command: gunicorn --version
+      register: gunicorn_check
+      changed_when: false
+    
+    - name: Display installation results
+      debug:
+        msg:
+          - "✅ Flask installed: {{ flask_check.stdout }}"
+          - "✅ Gunicorn installed: {{ gunicorn_check.stdout }}"
+
+# Made with Bob
