@@ -1,0 +1,32 @@
+---
+- name: Remove packages from systems
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Remove nginx on Debian/Ubuntu
+      apt:
+        name: nginx
+        state: absent
+        purge: yes
+        autoremove: yes
+      when: ansible_os_family == "Debian"
+    
+    - name: Remove nginx on RedHat/CentOS/RHEL
+      yum:
+        name: nginx
+        state: absent
+        autoremove: yes
+      when: ansible_os_family == "RedHat"
+    
+    - name: Verify removal
+      command: which nginx
+      register: removal_check
+      changed_when: false
+      failed_when: removal_check.rc == 0
+      ignore_errors: yes
+    
+    - name: Display removal status
+      debug:
+        msg: "Package nginx has been successfully removed"
+      when: removal_check.rc != 0
